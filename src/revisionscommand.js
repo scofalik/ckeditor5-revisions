@@ -17,10 +17,12 @@ import Command from '@ckeditor/ckeditor5-core/src/command';
  * @extends module:core/command~Command
  */
 export default class RevisionsCommand extends Command {
-	constructor( editor, type ) {
+	constructor( editor ) {
 		super( editor );
 
-		this.savedVersions = new Map();
+		this.savedRoot = null;
+		this.savedVersion = null;
+		this.originalRoot = null;
 	}
 
 	refresh() {
@@ -31,15 +33,15 @@ export default class RevisionsCommand extends Command {
 	execute( options = {} ) {
 		const doc = this.editor.document;
 
-		if ( !this.savedVersions.has( doc.version ) ) {
-			const copiedRoot = copyRoot( doc.getRoot() );
+		this.originalRoot = doc.getRoot();
+		this.savedRoot = copyRoot( doc.getRoot() );
+		this.savedVersion = doc.version;
 
-			this.savedVersions.set( doc.version, copiedRoot );
-		}
+		this.refresh();
 	}
 
 	_getValue() {
-		return true;
+		return this.savedVersion !== null;
 	}
 
 	_checkEnabled() {
